@@ -1,38 +1,211 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Matt Leung</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matt Leung | Spatial Depth Workspace</title>
+    <style>
+        :root {
+            --bg-color: #0A0A0A;
+            --text-main: #FFFFFF;
+            --text-muted: #777777;
+            --accent-color: #00FF66;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-serif: "Times New Roman", "Noto Serif TC", serif;
+        }
+
+        body { 
+            margin: 0; 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            font-family: var(--font-sans); 
+            height: 600vh; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .brand {
+            font-family: var(--font-serif);
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .scroll-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.8;
+            transition: opacity 0.5s ease;
+        }
+
+        .scroll-hint.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mouse-icon {
+            width: 20px;
+            height: 30px;
+            border: 2px solid var(--text-muted);
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .mouse-wheel {
+            width: 2px;
+            height: 6px;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+            position: absolute;
+            top: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: scroll-wheel 1.5s infinite ease-in-out;
+            box-shadow: 0 0 4px var(--accent-color);
+        }
+
+        @keyframes scroll-wheel {
+            0% { top: 4px; opacity: 1; }
+            100% { top: 16px; opacity: 0; }
+        }
+
+        .sticky-cam { 
+            position: sticky; 
+            top: 0; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            perspective: 800px; 
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .depth-text { 
+            position: absolute; 
+            font-size: 3.5rem; 
+            font-weight: 300; 
+            text-align: center; 
+            will-change: transform, opacity, filter;
+            width: 100%;
+            padding: 0 20px;
+            letter-spacing: 0.1em;
+        }
+
+        .depth-text strong { 
+            color: var(--accent-color); 
+            font-weight: 600; 
+        }
+
+        .conclusion {
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        .conclusion span {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .depth-text { font-size: 2rem; }
+            header { padding: 20px; }
+            .brand { font-size: 1rem; }
+            .conclusion span { font-size: 1.2rem; }
+        }
+    </style>
 </head>
-<body class="bg-[#0a0a0a] text-[#f5f0e8] font-sans antialiased">
-  <main class="min-h-screen flex flex-col">
-    <header class="bg-[#0a0a0a] border-b-2 md:border-b-4 border-black px-4 md:px-8 lg:px-16 py-4 md:py-6">
-      <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <a
-          href="#home"
-          class="font-bold tracking-tight text-lg md:text-xl text-[#f5f0e8] border-0 border-b-2 border-transparent focus:outline-none focus:border-[#8f1d1d] transition-colors duration-200"
-          aria-label="Matt Leung 首页"
-        >
-          Matt Leung
-        </a>
-      </div>
+<body>
+
+    <header>
+        <div class="brand">Matt Leung</div>
     </header>
 
-    <section
-      id="home"
-      class="flex-1 flex items-center bg-[#0a0a0a] border-b-2 md:border-b-4 border-black px-4 md:px-8 lg:px-16 py-16 md:py-24 lg:py-32"
-    >
-      <div class="max-w-6xl mx-auto w-full">
-        <div class="bg-[#f5f0e8] text-black border-2 md:border-4 border-black p-6 md:p-8 lg:p-12 hover:bg-black hover:text-white transition-colors duration-200">
-          <h1 class="font-bold tracking-tight text-4xl md:text-6xl lg:text-8xl leading-none">
-            Matt<br class="hidden md:block" /> Leung
-          </h1>
-          <div class="w-16 md:w-24 h-2 md:h-3 bg-[#8f1d1d] mt-6 md:mt-8 border-2 border-black"></div>
+    <div class="scroll-hint" id="scrollHint">
+        <div class="mouse-icon">
+            <div class="mouse-wheel"></div>
         </div>
-      </div>
-    </section>
-  </main>
+        <span>Scroll to Explore</span>
+    </div>
+
+    <div class="sticky-cam">
+        <div class="depth-text"><strong>裁切複雜</strong>，歸於系統。</div>
+        <div class="depth-text"><strong>靜默重複</strong>，隱於自動化。</div>
+        <div class="depth-text"><strong>定格經驗</strong>，內斂為方法。</div>
+        <div class="depth-text"><strong>無盡可能</strong>，留給 AI。</div>
+        <div class="depth-text" style="font-size: 2.5rem; line-height: 1.8;">
+            我工作在人與系統之間，<br>自動化與 AI 協作的場景中。
+        </div>
+        <div class="depth-text conclusion">
+            技術不是堆疊，是減法。<br>
+            <span>是讓工作，回歸到最輕的重量。</span>
+        </div>
+    </div>
+
+    <script>
+        const items = document.querySelectorAll('.depth-text');
+        const scrollHint = document.getElementById('scrollHint');
+        const totalItems = items.length;
+
+        function renderScene() {
+            const scrollY = window.scrollY;
+            const maxScroll = Math.max(1, document.body.scrollHeight - window.innerHeight);
+            const progress = scrollY / maxScroll;
+            
+            if (scrollY > 50) {
+                scrollHint.classList.add('hidden');
+            } else {
+                scrollHint.classList.remove('hidden');
+            }
+
+            items.forEach((item, i) => {
+                const peak = i / (totalItems - 1);
+                const diff = progress - peak;
+                
+                const z = diff * 5000; 
+                const opacity = 1 - Math.abs(diff) * 5; 
+                const blur = Math.abs(diff) * 20; 
+                
+                if (opacity > -0.2) {
+                    item.style.transform = `translateZ(${z}px)`;
+                    item.style.opacity = Math.max(0, opacity);
+                    item.style.filter = `blur(${Math.max(0, blur)}px)`;
+                } else {
+                    item.style.opacity = 0;
+                }
+            });
+        }
+
+        window.addEventListener('scroll', renderScene);
+        renderScene();
+    </script>
 </body>
 </html>
